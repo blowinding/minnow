@@ -69,7 +69,6 @@ int main()
       test.execute( BytesPushed( 0 ) );
       test.execute( ReadAll( "" ) );
       test.execute( IsFinished { false } );
-
       test.execute( Insert { { 0x0d, 0x0a, 0x63, 0x61, 0x0a, 0x66 }, 0 } );
       test.execute( BytesPushed( 6 ) );
 
