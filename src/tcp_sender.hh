@@ -44,46 +44,44 @@ public:
   const Reader& reader() const { return input_.reader(); }
 
   /* Retransmission Timer */
-  class RetransmissionTimer {
+  class RetransmissionTimer
+  {
   public:
-    RetransmissionTimer(uint64_t initial_RTO_ms): cur_RTO_ms_(initial_RTO_ms), expected_ackno_list_({}) {}
-    struct AckWrapper{
+    RetransmissionTimer( uint64_t initial_RTO_ms ) : cur_RTO_ms_( initial_RTO_ms ), expected_ackno_list_( {} ) {}
+    struct AckWrapper
+    {
       TCPSenderMessage mes_;
       uint64_t start_ms_;
     };
-    void updateRetransmissionTimer(uint64_t cur_ms, const TransmitFunction& transmit);
-    bool updateAcknoList(uint64_t ackno, Wrap32& isn, uint64_t checkpoint);
-    void insertAcknoList(TCPSenderMessage msg_, uint64_t start_ms_);
-    void updateWinNonZero(uint64_t peer_win_size) {
-      win_nonzero_ = (peer_win_size != 0);
-    }
-    uint64_t getConsecutiveRetransmissions() const {
-      return consecutive_retransmissions_;
-    }
-    uint64_t getSequenceNumbersInFlight() const {
+    void updateRetransmissionTimer( uint64_t cur_ms, const TransmitFunction& transmit );
+    bool updateAcknoList( uint64_t ackno, Wrap32& isn, uint64_t checkpoint );
+    void insertAcknoList( TCPSenderMessage msg_, uint64_t start_ms_ );
+    void updateWinNonZero( uint64_t peer_win_size ) { win_nonzero_ = ( peer_win_size != 0 ); }
+    uint64_t getConsecutiveRetransmissions() const { return consecutive_retransmissions_; }
+    uint64_t getSequenceNumbersInFlight() const
+    {
       uint64_t sum = {};
-      for (const auto& i: expected_ackno_list_) {
+      for ( const auto& i : expected_ackno_list_ ) {
         sum += i.mes_.sequence_length();
       }
       return sum;
     }
-    void resetConsecutiveRetransmissions() {
-      consecutive_retransmissions_ = 0;
-    }
-    void resetRTOms(uint64_t initial_RTO_ms) {
-      cur_RTO_ms_ = initial_RTO_ms;
-    }
-    void resetTimer(uint64_t cur_ms) {
-      for (auto& i: expected_ackno_list_) {
+    void resetConsecutiveRetransmissions() { consecutive_retransmissions_ = 0; }
+    void resetRTOms( uint64_t initial_RTO_ms ) { cur_RTO_ms_ = initial_RTO_ms; }
+    void resetTimer( uint64_t cur_ms )
+    {
+      for ( auto& i : expected_ackno_list_ ) {
         i.start_ms_ = cur_ms;
       }
     }
+
   private:
     uint64_t cur_RTO_ms_ {};
     uint64_t consecutive_retransmissions_ {};
     std::list<AckWrapper> expected_ackno_list_;
     bool win_nonzero_ { true };
   };
+
 private:
   // Variables initialized in constructor
   ByteStream input_;
@@ -91,9 +89,9 @@ private:
   uint64_t initial_RTO_ms_;
 
   // Variables used
-  uint64_t cur_ms_ { };
+  uint64_t cur_ms_ {};
   uint64_t peer_win_size_ { 1 };
-  uint64_t largest_ackno {0};
+  uint64_t largest_ackno { 0 };
   bool has_isn_ { false };
   bool has_fin_ { false };
 
@@ -102,7 +100,9 @@ private:
 
   // save transmit function for close
   TransmitFunction saveTransFunc_ {};
-  bool getCanSentFin() const {
-    return !has_fin_ && reader().is_finished() && (peer_win_size_ > reader().bytes_popped() + has_isn_ + reader().bytes_buffered() - largest_ackno);
+  bool getCanSentFin() const
+  {
+    return !has_fin_ && reader().is_finished()
+           && ( peer_win_size_ > reader().bytes_popped() + has_isn_ + reader().bytes_buffered() - largest_ackno );
   }
 };

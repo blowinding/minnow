@@ -71,12 +71,11 @@ int main()
       test.execute( ReadAll( "b" ) );
       test.execute( BytesPushed( 2 ) );
       test.execute( BytesPending( 0 ) );
-
     }
 
     {
       ReassemblerTestHarness test { "insert beyond capacity repeated with different data", 2 };
-      
+
       test.execute( Insert { "b", 1 } );
       test.execute( BytesPushed( 0 ) );
       test.execute( BytesPending( 1 ) );
@@ -105,18 +104,18 @@ int main()
       test.execute( Insert { "bc", 1 }.is_last() );
       test.execute( BytesPushed( 0 ) );
       test.execute( BytesPending( 1 ) );
-      
+
       test.execute( Insert { "a", 0 } );
       test.execute( BytesPushed( 2 ) );
       test.execute( BytesPending( 0 ) );
       test.execute( ReadAll( "ab" ) );
-      
+
       test.execute( IsFinished { false } );
 
       test.execute( Insert { "bc", 1 }.is_last() );
       test.execute( BytesPushed( 3 ) );
       test.execute( BytesPending( 0 ) );
-      
+
       test.execute( ReadAll( "c" ) );
 
       test.execute( IsFinished { true } );

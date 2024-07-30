@@ -27,7 +27,7 @@ public:
 
 private:
   Reassembler reassembler_;
-  Wrap32 ISN_ {0};
+  Wrap32 ISN_ { 0 };
   bool has_ISN_ { false };
   size_t ackno_ {};
 };
