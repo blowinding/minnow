@@ -1,12 +1,13 @@
 #pragma once
 
-#include <queue>
+#include <concepts>
 #include <iomanip>
+#include <queue>
 #include <sstream>
 #include <unordered_map>
-#include <concepts>
 
 #include "address.hh"
+#include "arp_message.hh"
 #include "ethernet_frame.hh"
 #include "ethernet_header.hh"
 #include "ipv4_datagram.hh"
@@ -33,8 +34,11 @@
 // request or reply, the network interface processes the frame
 // and learns or replies as necessary.
 template<typename T>
-concept isDgram = requires(T t, Serializer& s) {
-  { t.serialize(s) } -> std::same_as<void>;
+concept isDgram = requires( T t, Serializer& s )
+{
+  {
+    t.serialize( s )
+    } -> std::same_as<void>;
 };
 class NetworkInterface
 {
@@ -75,7 +79,8 @@ public:
   std::queue<InternetDatagram>& datagrams_received() { return datagrams_received_; }
 
   // ethernet address and timeout
-  struct MacAddrUnit {
+  struct MacAddrUnit
+  {
     EthernetAddress mac_addr_ {};
     uint64_t learning_time_ {};
   };
@@ -97,8 +102,8 @@ private:
   // Datagrams that have been received
   std::queue<InternetDatagram> datagrams_received_ {};
 
-  constexpr static uint64_t ARP_INTERVAL_ =  5000;
-  constexpr static uint64_t ARP_TIMEOUT_  = 30000;
+  constexpr static uint64_t ARP_INTERVAL_ = 5000;
+  constexpr static uint64_t ARP_TIMEOUT_ = 30000;
 
   // current time
   uint64_t cur_time_ {};
@@ -113,9 +118,14 @@ private:
   std::unordered_map<uint32_t, uint64_t> map_send_time_ {};
 
   template<isDgram T>
-  static void datagramToEthernetFrame(EthernetFrame& ethernetFrame, const T& internetDatagram, const EthernetAddress& dst, const EthernetAddress& src, const uint64_t& type) {
+  static void datagramToEthernetFrame( EthernetFrame& ethernetFrame,
+                                       const T& internetDatagram,
+                                       const EthernetAddress& dst,
+                                       const EthernetAddress& src,
+                                       const uint64_t& type )
+  {
     Serializer serializer;
-    internetDatagram.serialize(serializer);
+    internetDatagram.serialize( serializer );
     // header
     auto& header = ethernetFrame.header;
     header.src = src;
@@ -125,9 +135,14 @@ private:
     ethernetFrame.payload = serializer.output();
   }
 
-  static ARPMessage genArpEthernetFrame(uint16_t opcode, const EthernetAddress& src, const EthernetAddress& dst,
-                                         const uint32_t src_ip, const uint32_t dst_ip,
-                                         uint16_t hardwareType = ARPMessage::TYPE_ETHERNET, uint16_t protocolType = EthernetHeader::TYPE_IPv4) {
+  static ARPMessage genArpEthernetFrame( uint16_t opcode,
+                                         const EthernetAddress& src,
+                                         const EthernetAddress& dst,
+                                         const uint32_t src_ip,
+                                         const uint32_t dst_ip,
+                                         uint16_t hardwareType = ARPMessage::TYPE_ETHERNET,
+                                         uint16_t protocolType = EthernetHeader::TYPE_IPv4 )
+  {
     ARPMessage arpMessage {};
     arpMessage.hardware_type = hardwareType;
     arpMessage.protocol_type = protocolType;
@@ -139,16 +154,15 @@ private:
     return arpMessage;
   }
 
-  void transmitDgramInQueue(uint32_t sender_ip_address, const EthernetAddress& senderMac) {
+  void transmitDgramInQueue( uint32_t sender_ip_address, const EthernetAddress& senderMac )
+  {
     auto& senderQueue = map_queue_[sender_ip_address];
-    while (!senderQueue.empty()) {
+    while ( !senderQueue.empty() ) {
       auto& dgram = senderQueue.front();
       EthernetFrame frame {};
-      datagramToEthernetFrame(frame, dgram, senderMac, ethernet_address_, EthernetHeader::TYPE_IPv4);
-      transmit(frame);
+      datagramToEthernetFrame( frame, dgram, senderMac, ethernet_address_, EthernetHeader::TYPE_IPv4 );
+      transmit( frame );
       senderQueue.pop();
     }
   }
-
-
 };

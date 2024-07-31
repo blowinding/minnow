@@ -32,7 +32,21 @@ public:
   // Route packets between the interfaces
   void route();
 
+  struct rule
+  {
+    uint32_t route_prefix_;
+    uint8_t prefix_length_;
+    std::optional<Address> next_hop_;
+    size_t interface_num_;
+  };
+
 private:
   // The router's collection of network interfaces
   std::vector<std::shared_ptr<NetworkInterface>> _interfaces {};
+
+  // the router table
+  std::vector<rule> router_table_ {};
+
+  // route helper func
+  void routeHelperFunc( const InternetDatagram& dgram );
 };
